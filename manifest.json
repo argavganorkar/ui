@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Butterfly Effect",
+  "version": "1.0.0",
+  "description": "Extract trend insights and convert to moodboards.",
+  "action": {
+    "default_title": "Toggle Butterfly Effect"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["panel.html", "wgsn-bg.png", "logo.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "host_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "scripting", "storage"]
+}

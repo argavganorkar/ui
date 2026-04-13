@@ -1,0 +1,292 @@
+<aside class="ext-panel">
+    <div class="ext-inner">
+
+      <!-- Shared header -->
+      <header class="ext-header">
+        <div class="ext-brand">
+          <div class="ext-brand-icon">
+            <img src="logo.png" class="brand-logo" alt="Butterfly Effect">
+          </div>
+          <span class="ext-brand-name">Butterfly Effect</span>
+        </div>
+        <div class="ext-header-icons">
+          <button class="ext-icon-btn" id="btn-refresh" title="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+            </svg>
+          </button>
+          <button class="ext-icon-btn" title="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Step indicator -->
+      <div class="ext-steps" id="step-pips">
+        <div class="step-pip active" id="pip-1"></div>
+        <div class="step-pip" id="pip-2"></div>
+        <div class="step-pip" id="pip-3"></div>
+      </div>
+
+      <!-- ── Scrollable body containing all screens ── -->
+      <div class="ext-body" id="ext-body">
+
+        <!-- ════════ SCREEN 1: WELCOME / WAVE ════════ -->
+        <div id="screen-1" class="screen">
+          <div class="welcome-hero">
+            <img src="logo.png" alt="Butterfly Effect" class="hero-img">
+          </div>
+
+          <div class="welcome-text">
+            <h1 class="welcome-title">Welcome to Butterfly Effect</h1>
+            <p class="welcome-sub">Sharing information effortlessly with a smart AI in just a single click.</p>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 2: MODE SELECTION ════════ -->
+        <div id="screen-2" class="screen hidden">
+          <div class="mode-question">Select Analysis Path</div>
+          <p class="mode-sub">Choose how the AI should interpret this report's creative signal.</p>
+
+          <div class="mode-card" id="card-analyze">
+            <div class="mode-icon">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Analyze Full Page</div>
+              <div class="mode-desc">Automated insight extraction from the entire active report.</div>
+            </div>
+            <div class="mode-arrow">
+              <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </div>
+
+          <div class="mode-card" id="card-highlight">
+            <div class="mode-icon">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Precision Highlight</div>
+              <div class="mode-desc">Manually select sections to deeply analyze specific trend signals.</div>
+            </div>
+            <div class="mode-arrow">
+              <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 3A: ANALYZING ════════ -->
+        <div id="screen-3a" class="screen hidden">
+          <!-- Context strip -->
+          <div class="ctx-strip">
+            <img src="wgsn-bg.png" alt="thumb" class="ctx-thumb" />
+            <div>
+              <div class="ctx-title">Bathroom A/W 27/28</div>
+              <div class="ctx-sub">
+                <span class="ctx-live"></span>
+                Analyzing full report
+              </div>
+            </div>
+          </div>
+
+          <!-- Analyzing card -->
+          <div class="analyzing-card">
+            <div class="analyzing-top">
+              <div class="analyzing-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="analyzing-label" id="analyzing-label">Analyzing current report…</span>
+            </div>
+            <div class="analyzing-sub" id="analyzing-sub">Reading trends and extracting keywords</div>
+
+            <!-- Keywords subsection -->
+            <div class="kw-section-label">
+              <span class="kw-title">Extracted Keywords</span>
+              <span class="kw-badge" id="kw-badge-3a">0</span>
+            </div>
+            <div class="kw-chips" id="kw-chips-3a"></div>
+            <input type="text" class="add-kw-input" id="add-kw-3a" placeholder="+ Add keyword…" style="display:none;" />
+          </div>
+
+          <!-- AI insight (reveals after done) -->
+          <div class="insight-card" id="insight-3a">
+            <div class="insight-row">
+              <span class="insight-dot"></span>
+              <span class="insight-lbl">AI Read</span>
+            </div>
+            <p class="insight-body">
+              Centred on <strong>human-scaled wellness</strong> and <strong>craft revival</strong>.
+              Key signals: sensory retreat, nostalgic textures, and long-life materials.
+            </p>
+          </div>
+
+          <button class="ext-back" id="back-3a">← Change mode</button>
+        </div>
+
+        <!-- ════════ SCREEN 3B: HIGHLIGHT MODE ════════ -->
+        <div id="screen-3b" class="screen hidden">
+          <!-- Context strip -->
+          <div class="ctx-strip">
+            <img src="wgsn-bg.png" alt="thumb" class="ctx-thumb" />
+            <div>
+              <div class="ctx-title">Bathroom A/W 27/28</div>
+              <div class="ctx-sub">
+                <span class="ctx-live" style="background:#f59e0b;box-shadow:none;"></span>
+                Highlight mode active
+              </div>
+            </div>
+          </div>
+
+          <!-- Instruction card -->
+          <div class="instr-card">
+            <div class="instr-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </div>
+            <div class="instr-title">Highlight text on the page to extract insights</div>
+            <div class="instr-sub">Select any sentence or phrase from the report on the left.</div>
+          </div>
+
+          <!-- Waiting/detected pill -->
+          <div style="display:flex;justify-content:center;">
+            <div class="waiting-pill" id="wait-pill">
+              <div class="wait-ring" id="wait-ring"></div>
+              <span id="wait-label">Waiting for selection…</span>
+            </div>
+          </div>
+
+          <!-- Keywords (appear after selection) -->
+          <div class="analyzing-card" id="hl-kw-card" style="display:none;">
+            <div class="kw-section-label">
+              <span class="kw-title">Extracted Keywords</span>
+              <span class="kw-badge" id="kw-badge-3b">0</span>
+            </div>
+            <div class="kw-chips" id="kw-chips-3b"></div>
+          </div>
+
+          <!-- AI insight -->
+          <div class="insight-card" id="insight-3b">
+            <div class="insight-row">
+              <span class="insight-dot"></span>
+              <span class="insight-lbl">AI Read</span>
+            </div>
+            <p class="insight-body">
+              Selected text reflects <strong>sensory design principles</strong> — a rising signal
+              for <strong>material storytelling</strong> in premium bathroom contexts.
+            </p>
+          </div>
+
+          <button class="ext-back" id="back-3b">← Change mode</button>
+        </div>
+
+        </div>
+
+
+        <!-- ════════ SCREEN 5: VISUAL DISCOVERY ════════ -->
+        <div id="screen-5" class="screen hidden">
+          <div class="refine-title">Visual Discovery</div>
+          <div class="refine-sub">Select visuals that match your refined keywords to inform the moodboard direction.</div>
+          <div class="grid-images" id="grid-images-5">
+            <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1540932239986-30128078f365?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 6: CLUSTER SELECTION ════════ -->
+        <div id="screen-6" class="screen hidden">
+          <div class="refine-title">Select a Visual Cluster</div>
+          <div class="refine-sub">The system has grouped identical themes together based on your visual selection.</div>
+          
+          <div class="cluster-card active" onclick="this.classList.toggle('active')">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Sensory Minimalism</div>
+            <div style="display:flex; gap:4px;">
+              <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+              <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+            </div>
+          </div>
+          
+          <div class="cluster-card" onclick="this.classList.toggle('active')">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Nostalgic Craft</div>
+            <div style="display:flex; gap:4px;">
+              <img src="https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+              <img src="https://images.unsplash.com/photo-1540932239986-30128078f365?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 7: MOODBOARD LAYOUT ════════ -->
+        <div id="screen-7" class="screen hidden">
+          <div class="refine-title">Moodboard Layout</div>
+          <div class="refine-sub">Select how you want your images to be arranged in the final board.</div>
+          
+          <div class="layout-option active" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Organized Grid</div>
+          <div class="layout-option" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Freeform Canvas</div>
+          <div class="layout-option" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Editorial Spread</div>
+        </div>
+
+        <!-- ════════ SCREEN 8: COLOR PALETTE ════════ -->
+        <div id="screen-8" class="screen hidden">
+          <div class="refine-title">Generated Color Palette</div>
+          <div class="refine-sub">Based on your moodboard visuals, refine the exact hue balance.</div>
+          
+          <div class="palette-container">
+            <div class="color-chip" style="background:#B3A394;"></div>
+            <div class="color-chip" style="background:#D9D0C7;"></div>
+            <div class="color-chip" style="background:#7A8B89;"></div>
+            <div class="color-chip" style="background:#E2E8E4;"></div>
+            <div class="color-chip" style="background:#4A5352;"></div>
+          </div>
+          
+          <div class="slider-group">
+            <span class="slider-label">Saturation</span>
+            <input type="range" min="0" max="100" value="40" />
+          </div>
+          <div class="slider-group">
+            <span class="slider-label">Intensity</span>
+            <input type="range" min="0" max="100" value="65" />
+          </div>
+          <div class="slider-group">
+            <span class="slider-label">Dominance</span>
+            <input type="range" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+      </div><!-- /.ext-body -->
+
+      <!-- Footer -->
+      <footer class="ext-footer" id="ext-footer">
+        <button class="ext-cta" id="cta-btn" disabled>
+          <svg id="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="5 12 12 5 19 12"></polyline>
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+          </svg>
+          <span id="cta-label">Continue</span>
+        </button>
+      </footer>
+
+    </div><!-- /.ext-inner -->
+  </aside>
+  
+  <!-- Selectable text layer over the background (for Step 3B) -->
+  <div class="page-text-layer" id="text-layer"></div>
+
+  <!-- Text selection hint (Step 3B) -->
+  <div class="hl-hint" id="hl-hint">
+    <div class="indicator"></div>
+    <span>Ready for selection...</span>
+  </div>

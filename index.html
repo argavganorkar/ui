@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Insight Extractor — Multi-Step Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ROOT & RESET
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --accent: #6366f1;
+      --accent-2: #818cf8;
+      --accent-3: #a78bfa;
+      --text-1: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --card-bg: rgba(247, 248, 252, 0.94);
+      --card-bd: rgba(222, 225, 242, 0.88);
+      --chip-bg: #ede9fe;
+      --chip-col: #4f46e5;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d0f1a;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PAGE BACKGROUND (WGSN screenshot)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top left;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Scrim only where the panel sits */
+    .page-scrim {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 430px;
+      background: linear-gradient(to right,
+          transparent 0%,
+          rgba(8, 10, 20, 0.24) 25%,
+          rgba(8, 10, 20, 0.38) 100%);
+      pointer-events: none;
+    }
+
+    /* Selectable text layer over the background (for Step 3B) */
+    .page-text-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      /* enabled only in highlight mode */
+    }
+
+    .page-text-layer.active {
+      pointer-events: all;
+      cursor: text;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EXTENSION PANEL SHELL
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .ext-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 378px;
+      height: 100vh;
+      z-index: 200;
+      padding: 12px 12px 12px 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ext-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border: 1px solid rgba(208, 210, 232, 0.62);
+      border-radius: 16px;
+      box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.55) inset,
+        0 8px 36px rgba(0, 0, 0, 0.16),
+        0 2px 8px rgba(0, 0, 0, 0.10);
+      overflow: hidden;
+    }
+
+    /* ── Header (shared across all steps) ── */
+    .ext-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 11px;
+      background: rgba(255, 255, 255, 0.68);
+      border-bottom: 1px solid rgba(218, 220, 238, 0.68);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ext-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ext-brand-icon {
+      width: 27px;
+      height: 27px;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, .32);
+      flex-shrink: 0;
+    }
+
+    .ext-brand-icon svg {
+      width: 13px;
+      height: 13px;
+      fill: #fff;
+    }
+
+    .ext-brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -.25px;
+    }
+
+    .ext-header-icons {
+      display: flex;
+      gap: 2px;
+    }
+
+    .ext-icon-btn {
+      width: 29px;
+      height: 29px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      transition: background .15s, color .15s, transform .2s var(--spring);
+    }
+
+    .ext-icon-btn:hover {
+      background: #ede9fe;
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .ext-icon-btn svg {
+      width: 13.5px;
+      height: 13.5px;
+    }
+
+    /* ── Step indicator ── */
+    .ext-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 0 5px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.5);
+      border-bottom: 1px solid rgba(218, 220, 238, .5);
+    }
+
+    .step-pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(148, 163, 184, .35);
+      transition: width .3s var(--ease), background .3s;
+    }
+
+    .step-pip.active {
+      width: 20px;
+      border-radius: 4px;
+      background: var(--accent);
+    }
+
+    .step-pip.done {
+      background: rgba(99, 102, 241, .35);
+    }
+
+    /* ── Scrollable body ── */
+    .ext-body {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, .2) transparent;
+      position: relative;
+    }
+
+    .ext-body::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .ext-body::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, .2);
+      border-radius: 3px;
+    }
+
+    /* ── Footer (shared) ── */
+    .ext-footer {
+      padding: 11px 12px 12px;
+      border-top: 1px solid rgba(218, 220, 238, .68);
+      background: rgba(255, 255, 255, .68);
+      flex-shrink: 0;
+    }
+
+    .ext-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 11px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1 0%, #818cf8 65%, #a78bfa 100%);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: -.1px;
+      box-shadow: 0 5px 18px rgba(99, 102, 241, .38);
+      transition: transform .2s var(--spring), box-shadow .2s, opacity .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ext-cta:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .ext-cta:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(99, 102, 241, .48);
+    }
+
+    .ext-cta:not(:disabled):active {
+      transform: scale(.97);
+    }
+
+    .ext-cta svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Back button */
+    .ext-back {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1.5px solid rgba(148, 163, 184, .35);
+      border-radius: 9px;
+      color: var(--text-2);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+
+    .ext-back:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--chip-bg);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 1 — WELCOME / WAVE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-1 {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      overflow: hidden;
+      transition: opacity .45s var(--ease), transform .45s var(--ease);
+    }
+
+    #screen-1.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.97);
+    }
+
+    /* ── Canvas wave (Step 1) ── */
+    #wave-canvas-el {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+    }
+
+    /* Breathing animation for "Analyze" text */
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(-7px);
+        opacity: 0.85;
+      }
+    }
+
+    /* Welcome text */
+    .welcome-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .welcome-title {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      line-height: 1;
+      margin-bottom: 12px;
+      background: linear-gradient(160deg, #ffffff 20%, rgba(210, 170, 255, 0.88) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 22px rgba(150, 50, 255, 0.5));
+      animation: breathe 4.5s ease-in-out infinite;
+    }
+
+    .welcome-sub {
+      font-size: 12.5px;
+      font-weight: 400;
+      color: rgba(195, 175, 230, 0.65);
+      letter-spacing: .2px;
+      animation: breathe 4.5s ease-in-out infinite 0.7s;
+    }
+
+    /* Progress bar at bottom of step 1 */
+    .welcome-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      height: 2px;
+      background: rgba(255, 255, 255, .1);
+      overflow: hidden;
+    }
+
+    .welcome-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #8b0020, #a0005a, #6400a0, #2000b0);
+      border-radius: 2px;
+      animation: wProgress 2.8s var(--ease) forwards;
+      animation-delay: .3s;
+    }
+
+    @keyframes wProgress {
+      from {
+        width: 0%;
+      }
+
+      to {
+        width: 100%;
+      }
+    }
+
+    /* keep .wave-blob stub so JS blob reference doesn't error */
+    .wave-blob {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      filter: blur(55px);
+      opacity: 0.68;
+      animation: blobFloat linear infinite;
+    }
+
+    .wb1 {
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, #c026d3, #7c3aed, transparent 70%);
+      top: -60px;
+      left: -60px;
+      animation-duration: 8s;
+      animation-name: blobFloat1;
+    }
+
+    .wb2 {
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, #3b82f6, #6366f1, transparent 70%);
+      bottom: -50px;
+      right: -30px;
+      animation-duration: 10s;
+      animation-name: blobFloat2;
+    }
+
+    .wb3 {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, #ef4444, #dc2626, transparent 70%);
+      top: 30%;
+      left: 20%;
+      animation-duration: 6s;
+      animation-name: blobFloat3;
+    }
+
+    .wb4 {
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, #8b5cf6, #a78bfa, transparent 70%);
+      bottom: 25%;
+      right: 10%;
+      animation-duration: 7.5s;
+      animation-name: blobFloat4;
+    }
+
+    .wb5 {
+      width: 200px;
+      height: 130px;
+      background: radial-gradient(circle, #2563eb, #0ea5e9, transparent 70%);
+      top: 50%;
+      left: -20px;
+      animation-duration: 9s;
+      animation-name: blobFloat5;
+    }
+
+    @keyframes blobFloat1 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(80px, 60px) scale(1.12);
+      }
+
+      66% {
+        transform: translate(30px, 110px) scale(0.95);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    @keyframes blobFloat2 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      40% {
+        transform: translate(-70px, -50px) scale(1.15);
+      }
+
+      70% {
+        transform: translate(-20px, -90px) scale(1.05);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    @keyframes blobFloat3 {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+
+      50% {
+        transform: translate(50px, -40px) scale(1.2) rotate(20deg);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes blobFloat4 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      45% {
+        transform: translate(-60px, 50px) scale(1.1);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    @keyframes blobFloat5 {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      60% {
+        transform: translate(60px, -30px) scale(1.15);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    /* Frosted overlay over wave */
+    .wave-frost {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(2px);
+    }
+
+    /* Welcome text */
+    .welcome-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, .25);
+    }
+
+    .welcome-sub {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.72);
+      letter-spacing: .1px;
+    }
+
+    /* Progress bar at bottom of step 1 */
+    .welcome-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      height: 2px;
+      background: rgba(255, 255, 255, .15);
+      overflow: hidden;
+    }
+
+    .welcome-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #c026d3, #6366f1, #3b82f6);
+      border-radius: 2px;
+      animation: wProgress 2.8s var(--ease) forwards;
+      animation-delay: .3s;
+    }
+
+    @keyframes wProgress {
+      from {
+        width: 0%;
+      }
+
+      to {
+        width: 100%;
+      }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 2 — MODE SELECTION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-2 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+
+    #screen-2.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+    }
+
+    .mode-question {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-1);
+      line-height: 1.4;
+      padding: 4px 0 6px;
+      letter-spacing: -.2px;
+    }
+
+    .mode-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    /* Mode cards */
+    .mode-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-bd);
+      border-radius: 13px;
+      padding: 16px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      transition: border-color .2s var(--ease), background .2s,
+        transform .25s var(--spring), box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, .06), transparent);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .mode-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, .12);
+    }
+
+    .mode-card:hover::after {
+      opacity: 1;
+    }
+
+    .mode-card:active {
+      transform: scale(.98) translateY(0);
+    }
+
+    .mode-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .mode-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .icon-analyze {
+      background: #ede9fe;
+      color: #6366f1;
+    }
+
+    .icon-highlight {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .mode-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mode-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-1);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .mode-desc {
+      font-size: 11.5px;
+      color: var(--text-2);
+      line-height: 1.55;
+    }
+
+    .mode-arrow {
+      color: var(--text-3);
+      flex-shrink: 0;
+      margin-top: 10px;
+      transition: transform .2s var(--spring), color .2s;
+    }
+
+    .mode-card:hover .mode-arrow {
+      transform: translateX(3px);
+      color: var(--accent);
+    }
+
+    .mode-arrow svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Divider */
+    .mode-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+
+    .mode-divider::before,
+    .mode-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-bd);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 3A — ANALYZING
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-3a {
+      position: absolute;
+      inset: 0;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+
+    #screen-3a.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+
+    /* Context strip */
+    .ctx-strip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-bd);
+      border-radius: 12px;
+      padding: 10px 11px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ctx-thumb {
+      width: 52px;
+      height: 40px;
+      border-radius: 7px;
+      object-fit: cover;
+      object-position: 55% 30%;
+      border: 1px solid rgba(210, 212, 232, .5);
+      flex-shrink: 0;
+    }
+
+    .ctx-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-1);
+    }
+
+    .ctx-sub {
+      font-size: 10px;
+      color: var(--text-3);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ctx-live {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulseDot 2s ease infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulseDot {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, .5);
+      }
+
+      50% {
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
+      }
+    }
+
+    /* Analyzing state */
+    .analyzing-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-bd);
+      border-radius: 12px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .analyzing-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .analyzing-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .analyzing-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+
+    .analyzing-dots span:nth-child(2) {
+      animation-delay: .18s;
+    }
+
+    .analyzing-dots span:nth-child(3) {
+      animation-delay: .36s;
+    }
+
+    @keyframes dotBounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(1);
+        opacity: .35;
+      }
+
+      40% {
+        transform: scale(1.5);
+        opacity: 1;
+      }
+    }
+
+    .analyzing-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+
+    .analyzing-sub {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    /* Keywords section */
+    .kw-section-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kw-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-3);
+    }
+
+    .kw-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--chip-bg);
+      color: var(--accent);
+      padding: 1px 7px;
+      border-radius: 20px;
+    }
+
+    .kw-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 32px;
+    }
+
+    .kw-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--chip-bg);
+      color: var(--chip-col);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 11px 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(99, 102, 241, .15);
+      animation: chipPop .3s var(--spring) both;
+    }
+
+    @keyframes chipPop {
+      from {
+        transform: scale(.65);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .kw-chip-x {
+      border: none;
+      background: none;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1;
+      color: rgba(99, 102, 241, .4);
+      cursor: pointer;
+      display: flex;
+      transition: color .15s, transform .15s var(--spring);
+    }
+
+    .kw-chip-x:hover {
+      color: var(--accent);
+      transform: scale(1.2) rotate(90deg);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 3B — HIGHLIGHT MODE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-3b {
+      position: absolute;
+      inset: 0;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+
+    #screen-3b.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+
+    /* Instruction card */
+    .instr-card {
+      background: linear-gradient(135deg, rgba(237, 233, 254, .7), rgba(224, 231, 255, .5));
+      border: 1px solid rgba(99, 102, 241, .2);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instr-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--chip-bg);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .instr-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .instr-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-1);
+      line-height: 1.4;
+    }
+
+    .instr-sub {
+      font-size: 11px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* Waiting pill */
+    .waiting-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-2);
+      background: var(--card-bg);
+      border: 1px solid var(--card-bd);
+      border-radius: 20px;
+      padding: 6px 12px;
+      align-self: center;
+      transition: opacity .3s;
+    }
+
+    .waiting-pill.detected {
+      background: rgba(220, 252, 231, .8);
+      border-color: rgba(22, 163, 74, .25);
+      color: #16a34a;
+    }
+
+    .wait-ring {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(148, 163, 184, .4);
+      border-top-color: var(--accent);
+      animation: spin .8s linear infinite;
+    }
+
+    .wait-ring.done {
+      animation: none;
+      background: #22c55e;
+      border: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Dim hint over background when in highlight mode */
+    .highlight-hint {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 150;
+      pointer-events: none;
+      background: rgba(15, 23, 42, .75);
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity .4s;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+
+    .highlight-hint.visible {
+      opacity: 1;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AI INSIGHT CARD (shared 3A/3B)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .insight-card {
+      background: linear-gradient(135deg, rgba(237, 233, 254, .65), rgba(224, 231, 255, .45));
+      border: 1px solid rgba(99, 102, 241, .2);
+      border-radius: 10px;
+      padding: 11px 12px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+
+    .insight-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .insight-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .insight-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f59e0b;
+      flex-shrink: 0;
+    }
+
+    .insight-lbl {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      color: var(--accent);
+    }
+
+    .insight-body {
+      font-size: 11.5px;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    .insight-body strong {
+      color: var(--text-1);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 4 — KEYWORD REFINEMENT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-4 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    #screen-4.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+
+    .refine-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-1);
+    }
+    .refine-sub {
+      font-size: 11.5px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 5 — VISUAL DISCOVERY
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-5 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    #screen-5.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+
+    .grid-images {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .grid-img {
+      width: 100%;
+      height: 90px;
+      border-radius: 8px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform .2s, border-color .2s;
+    }
+    .grid-img:hover {
+      transform: scale(1.02);
+    }
+    .grid-img.selected {
+      border-color: var(--accent);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 6 — CLUSTER SELECTION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-6 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    #screen-6.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+    .cluster-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-bd);
+      border-radius: 12px;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform .2s, border-color .2s;
+    }
+    .cluster-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .cluster-card.active {
+      border-color: var(--accent);
+      background: rgba(99,102,241,0.05);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 7 — MOODBOARD LAYOUT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-7 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    #screen-7.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+    .layout-option {
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--card-bd);
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      transition: all .2s;
+    }
+    .layout-option:hover {
+      background: var(--chip-bg);
+      border-color: var(--accent);
+    }
+    .layout-option.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN: STEP 8 — COLOR PALETTE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-8 {
+      position: absolute;
+      inset: 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      transition: opacity .4s var(--ease), transform .4s var(--ease);
+    }
+    #screen-8.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(16px);
+    }
+    .palette-container {
+      display: flex;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 48px;
+    }
+    .color-chip {
+      flex: 1;
+      height: 100%;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .slider-label {
+      font-size: 11px;
+      color: var(--text-2);
+      font-weight: 600;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      margin-top: -6px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: var(--card-bd);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── WGSN Background ── -->
+  <div class="page-bg">
+    <img src="wgsn-bg.png" alt="WGSN report" class="bg-img" />
+    <div class="page-scrim"></div>
+  </div>
+
+  <!-- Selectable text overlay for Step 3B -->
+  <div class="page-text-layer" id="text-layer"></div>
+
+  <!-- Tooltip hint for highlight mode -->
+  <div class="highlight-hint" id="hl-hint">
+    ✦ Select any text on the report to extract insights
+  </div>
+
+  <!-- ══════════════════════════════════════
+     EXTENSION PANEL
+     ══════════════════════════════════════ -->
+  <aside class="ext-panel">
+    <div class="ext-inner">
+
+      <!-- Shared header -->
+      <header class="ext-header">
+        <div class="ext-brand">
+          <div class="ext-brand-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M13 2L4.5 13.5H11L10 22L20.5 10H14L13 2Z" />
+            </svg>
+          </div>
+          <span class="ext-brand-name">Insight Extractor</span>
+        </div>
+        <div class="ext-header-icons">
+          <button class="ext-icon-btn" id="btn-refresh" title="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+            </svg>
+          </button>
+          <button class="ext-icon-btn" title="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Step indicator -->
+      <div class="ext-steps" id="step-pips">
+        <div class="step-pip active" id="pip-1"></div>
+        <div class="step-pip" id="pip-2"></div>
+        <div class="step-pip" id="pip-3"></div>
+      </div>
+
+      <!-- ── Scrollable body containing all screens ── -->
+      <div class="ext-body" id="ext-body">
+
+        <!-- ════════ SCREEN 1: WELCOME / WAVE ════════ -->
+        <div id="screen-1" class="screen">
+          <!-- Canvas: fluid gradient rises from bottom -->
+          <canvas id="wave-canvas-el" aria-hidden="true"></canvas>
+          <!-- Top vignette keeps header edge clean -->
+          <div style="position:absolute;inset:0;z-index:1;pointer-events:none;
+            background:linear-gradient(to bottom,rgba(5,3,10,0.72) 0%,rgba(5,3,10,0) 42%);"></div>
+
+          <div class="welcome-content">
+            <div class="welcome-title">Analyze</div>
+            <div class="welcome-sub">Preparing your insights…</div>
+          </div>
+          <div class="welcome-progress">
+            <div class="welcome-progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 2: MODE SELECTION ════════ -->
+        <div id="screen-2" class="screen hidden">
+          <div class="mode-question">How would you like to proceed?</div>
+          <p class="mode-sub">Choose how the AI should extract insights from this report.</p>
+
+          <div class="mode-divider"><span>Options</span></div>
+
+          <div class="mode-card" id="card-analyze">
+            <div class="mode-icon icon-analyze">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Analyze Page</div>
+              <div class="mode-desc">Extract insights from the entire report automatically</div>
+            </div>
+            <div class="mode-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="mode-card" id="card-highlight">
+            <div class="mode-icon icon-highlight">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Highlight &amp; Analyze</div>
+              <div class="mode-desc">Select specific text on the page to analyze</div>
+            </div>
+            <div class="mode-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 3A: ANALYZING ════════ -->
+        <div id="screen-3a" class="screen hidden">
+          <!-- Context strip -->
+          <div class="ctx-strip">
+            <img src="wgsn-bg.png" alt="thumb" class="ctx-thumb" />
+            <div>
+              <div class="ctx-title">Bathroom A/W 27/28</div>
+              <div class="ctx-sub">
+                <span class="ctx-live"></span>
+                Analyzing full report
+              </div>
+            </div>
+          </div>
+
+          <!-- Analyzing card -->
+          <div class="analyzing-card">
+            <div class="analyzing-top">
+              <div class="analyzing-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="analyzing-label" id="analyzing-label">Analyzing current report…</span>
+            </div>
+            <div class="analyzing-sub" id="analyzing-sub">Reading trends and extracting keywords</div>
+
+            <!-- Keywords subsection -->
+            <div class="kw-section-label">
+              <span class="kw-title">Extracted Keywords</span>
+              <span class="kw-badge" id="kw-badge-3a">0</span>
+            </div>
+            <div class="kw-chips" id="kw-chips-3a"></div>
+            <input type="text" class="add-kw-input" id="add-kw-3a" placeholder="+ Add keyword…" style="display:none;" />
+          </div>
+
+          <!-- AI insight (reveals after done) -->
+          <div class="insight-card" id="insight-3a">
+            <div class="insight-row">
+              <span class="insight-dot"></span>
+              <span class="insight-lbl">AI Read</span>
+            </div>
+            <p class="insight-body">
+              Centred on <strong>human-scaled wellness</strong> and <strong>craft revival</strong>.
+              Key signals: sensory retreat, nostalgic textures, and long-life materials.
+            </p>
+          </div>
+
+          <button class="ext-back" id="back-3a">← Change mode</button>
+        </div>
+
+        <!-- ════════ SCREEN 3B: HIGHLIGHT MODE ════════ -->
+        <div id="screen-3b" class="screen hidden">
+          <!-- Context strip -->
+          <div class="ctx-strip">
+            <img src="wgsn-bg.png" alt="thumb" class="ctx-thumb" />
+            <div>
+              <div class="ctx-title">Bathroom A/W 27/28</div>
+              <div class="ctx-sub">
+                <span class="ctx-live" style="background:#f59e0b;box-shadow:none;"></span>
+                Highlight mode active
+              </div>
+            </div>
+          </div>
+
+          <!-- Instruction card -->
+          <div class="instr-card">
+            <div class="instr-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </div>
+            <div class="instr-title">Highlight text on the page to extract insights</div>
+            <div class="instr-sub">Select any sentence or phrase from the report on the left.</div>
+          </div>
+
+          <!-- Waiting/detected pill -->
+          <div style="display:flex;justify-content:center;">
+            <div class="waiting-pill" id="wait-pill">
+              <div class="wait-ring" id="wait-ring"></div>
+              <span id="wait-label">Waiting for selection…</span>
+            </div>
+          </div>
+
+          <!-- Keywords (appear after selection) -->
+          <div class="analyzing-card" id="hl-kw-card" style="display:none;">
+            <div class="kw-section-label">
+              <span class="kw-title">Extracted Keywords</span>
+              <span class="kw-badge" id="kw-badge-3b">0</span>
+            </div>
+            <div class="kw-chips" id="kw-chips-3b"></div>
+          </div>
+
+          <!-- AI insight -->
+          <div class="insight-card" id="insight-3b">
+            <div class="insight-row">
+              <span class="insight-dot"></span>
+              <span class="insight-lbl">AI Read</span>
+            </div>
+            <p class="insight-body">
+              Selected text reflects <strong>sensory design principles</strong> — a rising signal
+              for <strong>material storytelling</strong> in premium bathroom contexts.
+            </p>
+          </div>
+
+          <button class="ext-back" id="back-3b">← Change mode</button>
+        </div>
+
+        </div>
+
+        <!-- ════════ SCREEN 4: KEYWORD REFINEMENT ════════ -->
+        <div id="screen-4" class="screen hidden">
+          <div class="refine-title">Refine your insights</div>
+          <div class="refine-sub">Remove irrelevant keywords, or group them to guide the visual discovery process.</div>
+          
+          <div class="analyzing-card">
+            <div class="kw-chips" id="kw-chips-4"></div>
+            <input type="text" class="add-kw-input" id="add-kw-4" placeholder="+ Add keyword…" />
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 5: VISUAL DISCOVERY ════════ -->
+        <div id="screen-5" class="screen hidden">
+          <div class="refine-title">Visual Discovery</div>
+          <div class="refine-sub">Select visuals that match your refined keywords to inform the moodboard direction.</div>
+          <div class="grid-images" id="grid-images-5">
+            <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1540932239986-30128078f365?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=300&h=300" class="grid-img" />
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 6: CLUSTER SELECTION ════════ -->
+        <div id="screen-6" class="screen hidden">
+          <div class="refine-title">Select a Visual Cluster</div>
+          <div class="refine-sub">The system has grouped identical themes together based on your visual selection.</div>
+          
+          <div class="cluster-card active" onclick="this.classList.toggle('active')">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Sensory Minimalism</div>
+            <div style="display:flex; gap:4px;">
+              <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+              <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+            </div>
+          </div>
+          
+          <div class="cluster-card" onclick="this.classList.toggle('active')">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Nostalgic Craft</div>
+            <div style="display:flex; gap:4px;">
+              <img src="https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+              <img src="https://images.unsplash.com/photo-1540932239986-30128078f365?auto=format&fit=crop&q=80&w=100&h=100" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ SCREEN 7: MOODBOARD LAYOUT ════════ -->
+        <div id="screen-7" class="screen hidden">
+          <div class="refine-title">Moodboard Layout</div>
+          <div class="refine-sub">Select how you want your images to be arranged in the final board.</div>
+          
+          <div class="layout-option active" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Organized Grid</div>
+          <div class="layout-option" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Freeform Canvas</div>
+          <div class="layout-option" onclick="document.querySelectorAll('.layout-option').forEach(el=>el.classList.remove('active')); this.classList.add('active');">Editorial Spread</div>
+        </div>
+
+        <!-- ════════ SCREEN 8: COLOR PALETTE ════════ -->
+        <div id="screen-8" class="screen hidden">
+          <div class="refine-title">Generated Color Palette</div>
+          <div class="refine-sub">Based on your moodboard visuals, refine the exact hue balance.</div>
+          
+          <div class="palette-container">
+            <div class="color-chip" style="background:#B3A394;"></div>
+            <div class="color-chip" style="background:#D9D0C7;"></div>
+            <div class="color-chip" style="background:#7A8B89;"></div>
+            <div class="color-chip" style="background:#E2E8E4;"></div>
+            <div class="color-chip" style="background:#4A5352;"></div>
+          </div>
+          
+          <div class="slider-group">
+            <span class="slider-label">Saturation</span>
+            <input type="range" min="0" max="100" value="40" />
+          </div>
+          <div class="slider-group">
+            <span class="slider-label">Intensity</span>
+            <input type="range" min="0" max="100" value="65" />
+          </div>
+          <div class="slider-group">
+            <span class="slider-label">Dominance</span>
+            <input type="range" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+      </div><!-- /.ext-body -->
+
+      <!-- Footer -->
+      <footer class="ext-footer" id="ext-footer">
+        <button class="ext-cta" id="cta-btn" disabled>
+          <svg id="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="5 12 12 5 19 12"></polyline>
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+          </svg>
+          <span id="cta-label">Continue</span>
+        </button>
+      </footer>
+
+    </div><!-- /.ext-inner -->
+  </aside>
+
+  <script>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STATE MACHINE
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    const KEYWORDS = [
+      'Wellness-led design', 'Nostalgic craft', 'Durability',
+      'Sensory appeal', 'Personalisation', 'Escapism'
+    ];
+    const HL_KEYWORDS = [
+      'Sensory appeal', 'Durability', 'Nostalgic craft', 'Escapism'
+    ];
+
+    let state = 'step1';
+    let activeKW = [];
+    let extractionTimer = null;
+
+    const $ = id => document.getElementById(id);
+
+    // Screens
+    const s1 = $('screen-1'), s2 = $('screen-2');
+    const s3a = $('screen-3a'), s3b = $('screen-3b');
+    const s4 = $('screen-4'), s5 = $('screen-5'), s6 = $('screen-6'), s7 = $('screen-7'), s8 = $('screen-8');
+
+    // Pips
+    const pip1 = $('pip-1'), pip2 = $('pip-2'), pip3 = $('pip-3');
+
+    // CTA
+    const ctaBtn = $('cta-btn'), ctaLabel = $('cta-label');
+    const footer = $('ext-footer');
+
+    /* ── Pip update ── */
+    function updatePips(step) {
+      // Just a simple visual indicator logic (doesn't need perfect mapping for 8 steps in this UI since it has 3 dots originally)
+      // I'll keep the 3 dots but fill them over time
+      [pip1, pip2, pip3].forEach(p => { p.className = 'step-pip'; });
+      if (step === 'step1') { pip1.className = 'step-pip active'; }
+      else if (step === 'step2') { pip1.className = 'step-pip done'; pip2.className = 'step-pip active'; }
+      else if (['step3a', 'step3b', 'step4'].includes(step)) {
+        pip1.className = 'step-pip done'; pip2.className = 'step-pip done'; pip3.className = 'step-pip active';
+      } else {
+        pip1.className = 'step-pip done'; pip2.className = 'step-pip done'; pip3.className = 'step-pip done';
+      }
+    }
+
+    /* ── Transition screens ── */
+    function go(next) {
+      [s1, s2, s3a, s3b, s4, s5, s6, s7, s8].forEach(s => s.classList.add('hidden'));
+      const map = { step1: s1, step2: s2, step3a: s3a, step3b: s3b, step4: s4, step5: s5, step6: s6, step7: s7, step8: s8 };
+      const sc = map[next];
+      if (sc) sc.classList.remove('hidden');
+      state = next;
+      updatePips(next);
+      setupCTAForState(next);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 1 → auto-advance after progress bar
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    footer.style.display = 'none'; // hide footer on step 1
+
+    setTimeout(() => {
+      footer.style.display = '';
+      go('step2');
+    }, 3300); // matches progress bar animation (2.8s + 0.3s delay + buffer)
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 2 — mode selection
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    $('card-analyze').addEventListener('click', () => {
+      go('step3a');
+      startAnalysis();
+    });
+
+    $('card-highlight').addEventListener('click', () => {
+      go('step3b');
+      startHighlightMode();
+    });
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 3A — progressive keyword extraction
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    function makeChip(text, containerId, badgeId) {
+      const chip = document.createElement('span');
+      chip.className = 'kw-chip';
+      const lbl = document.createElement('span');
+      lbl.textContent = text;
+      const rm = document.createElement('button');
+      rm.className = 'kw-chip-x';
+      rm.innerHTML = '&times;';
+      rm.onclick = () => {
+        chip.style.transition = 'transform .15s,opacity .15s';
+        chip.style.transform = 'scale(0.6)'; chip.style.opacity = '0';
+        setTimeout(() => chip.remove(), 160);
+        activeKW = activeKW.filter(k => k !== text);
+        updateBadge(badgeId);
+        checkCTA();
+      };
+      chip.appendChild(lbl);
+      chip.appendChild(rm);
+      document.getElementById(containerId).appendChild(chip);
+      activeKW.push(text);
+      updateBadge(badgeId);
+      checkCTA();
+    }
+
+    function updateBadge(id) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = activeKW.length;
+    }
+
+    function checkCTA() {
+      if (['step3a', 'step3b'].includes(state)) {
+        if (activeKW.length > 0) {
+          ctaBtn.disabled = false;
+          ctaLabel.textContent = `Refine Keywords (${activeKW.length})`;
+        } else {
+          ctaBtn.disabled = true;
+          ctaLabel.textContent = 'Refine Keywords';
+        }
+      }
+    }
+
+    function startAnalysis() {
+      activeKW = [];
+      checkCTA();
+      ctaBtn.disabled = true;
+      const chips3a = $('kw-chips-3a');
+      chips3a.innerHTML = '';
+      $('insight-3a').classList.remove('visible');
+      $('add-kw-3a').style.display = 'none';
+      $('kw-badge-3a').textContent = '0';
+      $('analyzing-label').textContent = 'Analyzing current report…';
+      $('analyzing-sub').textContent = 'Reading trends and extracting keywords';
+
+      let i = 0;
+      const reveal = () => {
+        if (state !== 'step3a') return;
+        if (i < KEYWORDS.length) {
+          makeChip(KEYWORDS[i], 'kw-chips-3a', 'kw-badge-3a');
+          i++;
+          extractionTimer = setTimeout(reveal, 680);
+        } else {
+          // Done
+          $('analyzing-label').textContent = 'Extraction complete';
+          $('analyzing-sub').textContent = `${KEYWORDS.length} keywords identified`;
+          $('add-kw-3a').style.display = '';
+          setTimeout(() => $('insight-3a').classList.add('visible'), 300);
+        }
+      };
+      extractionTimer = setTimeout(reveal, 1100);
+
+      // Add keyword on Enter
+      $('add-kw-3a').addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        const v = e.target.value.trim();
+        if (!v || activeKW.includes(v)) { e.target.value = ''; return; }
+        makeChip(v, 'kw-chips-3a', 'kw-badge-3a');
+        e.target.value = '';
+      });
+    }
+
+    $('back-3a').addEventListener('click', () => {
+      clearTimeout(extractionTimer);
+      activeKW = [];
+      checkCTA();
+      go('step2');
+    });
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 3B — highlight mode
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    let hlTriggered = false;
+
+    function startHighlightMode() {
+      activeKW = [];
+      checkCTA();
+      ctaBtn.disabled = true;
+      hlTriggered = false;
+      $('kw-chips-3b').innerHTML = '';
+      $('kw-badge-3b').textContent = '0';
+      $('hl-kw-card').style.display = 'none';
+      $('insight-3b').classList.remove('visible');
+      $('wait-pill').classList.remove('detected');
+      $('wait-ring').classList.remove('done');
+      $('wait-label').textContent = 'Waiting for selection…';
+
+      // Enable text-layer
+      $('text-layer').classList.add('active');
+      $('hl-hint').classList.add('visible');
+    }
+
+    function onTextSelected() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || state !== 'step3b' || hlTriggered) return;
+      const txt = sel.toString().trim();
+      if (txt.length < 3) return;
+
+      hlTriggered = true;
+      $('text-layer').classList.remove('active');
+      $('hl-hint').classList.remove('visible');
+
+      // Show detected state
+      $('wait-ring').classList.add('done');
+      $('wait-label').textContent = 'Selection detected!';
+      $('wait-pill').classList.add('detected');
+
+      $('hl-kw-card').style.display = '';
+
+      let i = 0;
+      const reveal = () => {
+        if (state !== 'step3b') return;
+        if (i < HL_KEYWORDS.length) {
+          makeChip(HL_KEYWORDS[i], 'kw-chips-3b', 'kw-badge-3b');
+          i++;
+          setTimeout(reveal, 600);
+        } else {
+          setTimeout(() => $('insight-3b').classList.add('visible'), 350);
+        }
+      };
+      setTimeout(reveal, 500);
+    }
+
+    document.addEventListener('mouseup', onTextSelected);
+
+    $('back-3b').addEventListener('click', () => {
+      $('text-layer').classList.remove('active');
+      $('hl-hint').classList.remove('visible');
+      activeKW = [];
+      checkCTA();
+      go('step2');
+    });
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CANVAS WAVE — Step 1
+       Fluid gradient (deep red → magenta → violet → blue)
+       rises slowly from the bottom, like ink dispersing in water
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    (function () {
+      const canvas = document.getElementById('wave-canvas-el');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const CLOUDS = [
+        { nx: 0.18, ny: 1.30, rxR: 0.78, ryR: 0.52, rgb: [108, 0, 16], rise: 0.026, driftP: 19000, driftA: 0.09, ph: 0.0 },
+        { nx: 0.58, ny: 1.55, rxR: 0.72, ryR: 0.50, rgb: [152, 0, 62], rise: 0.021, driftP: 24000, driftA: 0.11, ph: 1.2 },
+        { nx: 0.80, ny: 1.12, rxR: 0.68, ryR: 0.47, rgb: [86, 0, 142], rise: 0.029, driftP: 17000, driftA: 0.08, ph: 2.4 },
+        { nx: 0.32, ny: 1.72, rxR: 0.62, ryR: 0.55, rgb: [28, 0, 150], rise: 0.024, driftP: 21000, driftA: 0.09, ph: 3.6 },
+        { nx: 0.65, ny: 1.90, rxR: 0.74, ryR: 0.53, rgb: [136, 0, 106], rise: 0.019, driftP: 15000, driftA: 0.12, ph: 0.8 },
+        { nx: 0.44, ny: 1.38, rxR: 0.57, ryR: 0.46, rgb: [52, 0, 128], rise: 0.033, driftP: 26000, driftA: 0.07, ph: 4.2 },
+      ];
+      const yStates = CLOUDS.map(c => c.ny);
+      let lastTs = null, animId = null;
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = canvas.offsetWidth, h = canvas.offsetHeight;
+        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+          canvas.width = w * dpr; canvas.height = h * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        return { W: w, H: h };
+      }
+
+      function frame(ts) {
+        const dt = lastTs ? Math.min((ts - lastTs) / 1000, 0.08) : 0;
+        lastTs = ts;
+        const { W, H } = resize();
+
+        // Near-black base
+        ctx.fillStyle = '#05030a';
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.globalCompositeOperation = 'screen';
+
+        CLOUDS.forEach((c, i) => {
+          yStates[i] -= c.rise * dt;
+          if (yStates[i] < -0.7) yStates[i] = 1.65;
+
+          const driftRad = (ts / c.driftP) * Math.PI * 2 + c.ph;
+          const cx = (c.nx + Math.sin(driftRad) * c.driftA) * W;
+          const cy = yStates[i] * H;
+          const rx = c.rxR * W;
+          const ry = c.ryR * H * 0.60;
+
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.scale(1, ry / rx);
+
+          const [r, g, b] = c.rgb;
+          const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+          gr.addColorStop(0, `rgba(${r},${g},${b},0.90)`);
+          gr.addColorStop(0.40, `rgba(${r},${g},${b},0.52)`);
+          gr.addColorStop(0.72, `rgba(${r},${g},${b},0.16)`);
+          gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+
+          ctx.beginPath();
+          ctx.arc(0, 0, rx, 0, Math.PI * 2);
+          ctx.fillStyle = gr;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Warm violet inner glow at bottom-center
+        const bloom = ctx.createRadialGradient(W * .5, H * .92, 0, W * .5, H * .92, W * .62);
+        bloom.addColorStop(0, 'rgba(155,25,200,0.14)');
+        bloom.addColorStop(0.6, 'rgba(80,0,130,0.05)');
+        bloom.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
+
+        // Top vignette — dark fade so header reads cleanly
+        const vig = ctx.createLinearGradient(0, 0, 0, H * 0.50);
+        vig.addColorStop(0, 'rgba(5,3,10,0.90)');
+        vig.addColorStop(0.45, 'rgba(5,3,10,0.18)');
+        vig.addColorStop(1, 'rgba(5,3,10,0)');
+        ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+
+        animId = requestAnimationFrame(frame);
+      }
+
+      animId = requestAnimationFrame(frame);
+      window._waveStop = () => { cancelAnimationFrame(animId); lastTs = null; };
+      window._waveStart = () => { animId = requestAnimationFrame(frame); };
+    })();
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       REFRESH — restart from step 1
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    $('btn-refresh').addEventListener('click', () => {
+      clearTimeout(extractionTimer);
+      $('text-layer').classList.remove('active');
+      $('hl-hint').classList.remove('visible');
+      hlTriggered = false;
+      activeKW = [];
+      checkCTA();
+      footer.style.display = 'none';
+      go('step1');
+
+      // Restart progress bar via re-render
+      const bar = $('progress-bar');
+      bar.style.animation = 'none';
+      void bar.offsetWidth;
+      bar.style.animation = '';
+
+      setTimeout(() => {
+        footer.style.display = '';
+        go('step2');
+      }, 3300);
+    });
+
+    /* ── CTA click state logic ── */
+    function setupCTAForState(st) {
+      if (st === 'step1' || st === 'step2') {
+        ctaBtn.disabled = true;
+        ctaLabel.textContent = 'Continue';
+      } else if (st === 'step4') {
+        ctaBtn.disabled = false;
+        ctaLabel.textContent = 'Curate Visuals';
+      } else if (st === 'step5') {
+        ctaBtn.disabled = false;
+        ctaLabel.textContent = 'Select Clusters';
+      } else if (st === 'step6') {
+        ctaBtn.disabled = false;
+        ctaLabel.textContent = 'Choose Layout';
+      } else if (st === 'step7') {
+        ctaBtn.disabled = false;
+        ctaLabel.textContent = 'Generate Palette';
+      } else if (st === 'step8') {
+        ctaBtn.disabled = false;
+        ctaLabel.textContent = 'Save Moodboard';
+      }
+    }
+
+    ctaBtn.addEventListener('click', () => {
+      if (ctaBtn.disabled) return;
+      
+      if (state === 'step3a' || state === 'step3b') {
+        // Move to Step 4 (Keyword refinement) and clone chips
+        $('kw-chips-4').innerHTML = '';
+        activeKW.forEach(kw => makeChip(kw, 'kw-chips-4', 'null-badge')); // using null badge since no badge in step4
+        go('step4');
+      } else if (state === 'step4') {
+        go('step5');
+      } else if (state === 'step5') {
+        go('step6');
+      } else if (state === 'step6') {
+        go('step7');
+      } else if (state === 'step7') {
+        go('step8');
+      } else if (state === 'step8') {
+        const orig = ctaLabel.textContent;
+        ctaLabel.textContent = '✨ Saved!';
+        ctaBtn.disabled = true;
+        setTimeout(() => { ctaLabel.textContent = orig; ctaBtn.disabled = false; }, 2000);
+      }
+    });
+
+    // Make step 5 images selectable
+    document.querySelectorAll('.grid-img').forEach(img => {
+      img.addEventListener('click', () => {
+        img.classList.toggle('selected');
+      });
+    });
+
+    // Handle add keyword enter on step 4
+    $('add-kw-4').addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      const v = e.target.value.trim();
+      if (!v || activeKW.includes(v)) { e.target.value = ''; return; }
+      makeChip(v, 'kw-chips-4', 'null-badge');
+      e.target.value = '';
+    });
+    
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Butterfly Effect — Moodboard Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <img src="logo.png" class="brand-logo" alt="Butterfly Effect">
+          <span class="brand-name">Butterfly Effect</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="report-preview" id="report-preview" style="background-image: url('wgsn-bg.png')">
+           <div class="preview-overlay"><span>Active Report</span></div>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <h3 class="section-title">Extracted Keywords</h3>
+        <div id="kw-chips-container" class="kw-chips">
+          <!-- Keywords will be injected here -->
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="step-indicator">
+          <div class="step-pip done"></div>
+          <div class="step-pip done"></div>
+          <div class="step-pip active" id="pip-current"></div>
+        </div>
+    </aside>
+
+    <main class="workspace">
+      <!-- DASHBOARD OVERLAYS -->
+      <button id="btn-back-affordance" class="back-affordance" title="Go Back">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+
+      <div class="workspace-container" id="workspace-container">
+        <!-- SCREEN 4: KEYWORD REVIEW — BUBBLE VERSION -->
+        <section id="screen-4" class="screen">
+          <div class="ai-insight-hero">
+            <span class="insight-label">AI Insight</span>
+            <h1 id="ai-explanation-text">Strategic patterns identified.</h1>
+            <p>These core themes define your research path. Watch them settle into your creative foundation below.</p>
+          </div>
+
+          <div class="keyword-review-container" id="keyword-review-container">
+            <!-- Normal UI: Chips will be dynamically injected here by app.js -->
+          </div>
+
+          <div class="action-footer">
+            <button id="btn-generate-moodboard" class="btn-generate-premium">
+              Generate Moodboard
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- SCREEN 5: VISUAL DISCOVERY -->
+        <section id="screen-5" class="screen hidden">
+        <header class="workspace-header">
+          <h1>Visual Discovery</h1>
+          <p>Select images that resonate with your extracted keywords.</p>
+        </header>
+        <div class="grid-images" id="image-grid">
+          <!-- Images will be injected here -->
+        </div>
+
+        <div class="action-footer">
+          <button id="btn-visuals-done" class="btn-generate-premium">
+            Analyze Visual Vibe
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- SCREEN 6: CLUSTER SELECTION -->
+      <section id="screen-6" class="screen hidden">
+        <header class="workspace-header">
+          <h1>Creative Directions</h1>
+          <p>We've analyzed your vibe selections and generated these distinct aesthetic paths. Select one to base your final moodboard on.</p>
+        </header>
+        <div id="cluster-list" class="cluster-list">
+          <!-- Clusters will be dynamically injected here by app.js -->
+        </div>
+      </section>
+
+      <!-- SCREEN 7: MOODBOARD LAYOUT -->
+      <section id="screen-7" class="screen hidden">
+        <header class="workspace-header">
+          <h1>Choose your layout style</h1>
+          <p class="subtext-light">Tap any option below to explore more templates like it.</p>
+        </header>
+
+        <div class="layout-grid-refined">
+          <!-- STRUCTURED -->
+          <div class="layout-card" data-layout="structured">
+            <div class="layout-preview preview-structured">
+              <div class="mini-box"></div><div class="mini-box"></div>
+              <div class="mini-box"></div><div class="mini-box"></div>
+            </div>
+            <div class="layout-label">Structured</div>
+          </div>
+
+          <!-- UNSTRUCTURED -->
+          <div class="layout-card" data-layout="unstructured">
+            <div class="layout-preview preview-unstructured">
+              <div class="mini-column"><div class="mini-box h-1"></div><div class="mini-box h-2"></div></div>
+              <div class="mini-column"><div class="mini-box h-2"></div><div class="mini-box h-1"></div></div>
+            </div>
+            <div class="layout-label">Unstructured</div>
+          </div>
+
+          <!-- MAKE YOUR OWN -->
+          <div class="layout-card" data-layout="collage">
+            <div class="layout-preview preview-collage">
+              <div class="mini-box overlap-1"></div>
+              <div class="mini-box overlap-2"></div>
+              <div class="mini-box overlap-3"></div>
+            </div>
+            <div class="layout-label">Make Your Own</div>
+          </div>
+        </div>
+
+        <div class="action-footer">
+          <button id="btn-layout-done" class="btn-generate-premium">
+            Finalize Moodboard
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- TEMPLATE EXPLORER MODAL -->
+      <div id="template-explorer" class="modal-explorer hidden">
+        <div class="explorer-content">
+          <header class="explorer-header">
+            <h2 id="explorer-title">Refined Templates</h2>
+            <button id="close-explorer" class="close-btn">&times;</button>
+          </header>
+          <div id="explorer-grid" class="explorer-grid">
+            <!-- Variation templates will be injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 8: FINAL MOODBOARD & PALETTE -->
+      <section id="screen-8" class="screen hidden">
+        <header class="workspace-header">
+          <h1>Final Moodboard & Palette</h1>
+          <p>Analyze your results and bridge the gap to professional CMF decisions.</p>
+        </header>
+
+        <div class="final-output-workspace">
+          <!-- TOP: FINAL MOODBOARD VIEW -->
+          <div id="final-moodboard-output" class="final-moodboard-output">
+            <!-- Dynamic layout injected here -->
+          </div>
+
+          <!-- PRIMARY ACTION -->
+          <div class="palette-tools">
+            <button id="btn-extract-palette" class="btn-primary-large">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              Extract Color Palette
+            </button>
+          </div>
+
+          <!-- PRIMARY RESULT -->
+          <div id="primary-palette-view" class="primary-palette-view hidden">
+            <h3>Primary Palette</h3>
+            <div id="primary-swatches" class="palette-swatches"></div>
+            
+            <button id="btn-explore-palettes" class="explore-btn">
+              Explore More Palettes ⌵
+            </button>
+
+            <!-- EXPANDED PALETTES -->
+            <div id="expanded-palette-system" class="expanded-palette-system hidden">
+              <div class="palette-category-grid" id="expanded-grid"></div>
+            </div>
+          </div>
+
+          <div class="action-footer">
+            <button id="btn-save-moodboard" class="btn-generate-premium">
+              Save Final Moodboard
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
